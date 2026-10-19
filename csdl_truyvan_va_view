@@ -1,0 +1,252 @@
+//1.hien thi danh sach bac si va ten khoa
+SELECT 
+    BS.MaBS,
+    BS.HoTen,
+    BS.GioiTinh,
+    BS.SDT,
+    K.TenKhoa
+FROM BacSi BS
+JOIN Khoa K ON BS.MaKhoa = K.MaKhoa;
+
+//2.hien thi lich kham cua benh nhan
+SELECT 
+    LK.MaLK,
+    BN.HoTen AS TenBenhNhan,
+    BS.HoTen AS TenBacSi,
+    LK.ThoiGianKham,
+    LK.LyDo,
+    LK.TrangThai
+FROM LichKham LK
+JOIN BenhNhan BN ON LK.MaBN = BN.MaBN
+JOIN BacSi BS ON LK.MaBS = BS.MaBS;
+
+//3.tim cac lich kham dang cho kham
+SELECT *
+FROM LichKham
+WHERE TrangThai = N'Chờ khám'
+ORDER BY ThoiGianKham ASC;
+
+//4.tim benh nhan da kham trong mot khoang thoi gian
+SELECT DISTINCT
+    BN.MaBN,
+    BN.HoTen,
+    BN.NgaySinh,
+    BN.SDT
+FROM BenhNhan BN
+JOIN LichKham LK ON BN.MaBN = LK.MaBN
+WHERE LK.TrangThai = N'Đã khám'
+  AND LK.ThoiGianKham >= '20260101'
+  AND LK.ThoiGianKham < '20270101';
+
+//5.dem so bac si cua tung khoa
+SELECT 
+    K.MaKhoa,
+    K.TenKhoa,
+    COUNT(BS.MaBS) AS SoLuongBacSi
+FROM Khoa K
+LEFT JOIN BacSi BS ON K.MaKhoa = BS.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa;
+
+//6.tim cac khoa co 3 bac si tro len
+SELECT 
+    K.MaKhoa,
+    K.TenKhoa,
+    COUNT(BS.MaBS) AS SoLuongBacSi
+FROM Khoa K
+JOIN BacSi BS ON K.MaKhoa = BS.MaKhoa
+GROUP BY K.MaKhoa, K.TenKhoa
+HAVING COUNT(BS.MaBS) >= 3;
+
+//7.thong ke so lich kham cua tung bac si
+SELECT 
+    BS.MaBS,
+    BS.HoTen,
+    COUNT(LK.MaLK) AS SoLichKham
+FROM BacSi BS
+LEFT JOIN LichKham LK ON BS.MaBS = LK.MaBS
+GROUP BY BS.MaBS, BS.HoTen
+ORDER BY SoLichKham DESC;
+
+//8.tim cac thuoc co gia ban cao hon gia trung binh tat ca thuoc
+SELECT 
+    MaThuoc,
+    TenThuoc,
+    DonVi,
+    DonGia,
+    SoLuongTon
+FROM Thuoc
+WHERE DonGia > (
+    SELECT AVG(DonGia)
+    FROM Thuoc
+    WHERE DonGia IS NOT NULL
+);
+
+//9.thong ke tong tien thuoc theo tung don thuoc
+SELECT 
+    DT.MaDT,
+    DT.NgayKe,
+    SUM(CT.SoLuong * CT.DonGiaKe) AS TongTienThuoc
+FROM DonThuoc DT
+JOIN ChiTietDonThuoc CT ON DT.MaDT = CT.MaDT
+GROUP BY DT.MaDT, DT.NgayKe;
+
+//10.thong ke doanh thu hoa don da thanh toan theo thang
+SELECT 
+    YEAR(NgayLap) AS Nam,
+    MONTH(NgayLap) AS Thang,
+    COUNT(MaHD) AS SoHoaDon,
+    SUM(TongTien) AS TongDoanhThu
+FROM HoaDon
+WHERE TrangThai = N'Đã thanh toán'
+GROUP BY YEAR(NgayLap), MONTH(NgayLap)
+ORDER BY Nam DESC, Thang DESC;
+
+//view1 danh sach lich kham chi tiet
+CREATE VIEW vw_DanhSachLichKham
+AS
+SELECT 
+    LK.MaLK,
+    BN.MaBN,
+    BN.HoTen AS TenBenhNhan,
+    BS.MaBS,
+    BS.HoTen AS TenBacSi,
+    K.TenKhoa,
+    LK.ThoiGianKham,
+    LK.LyDo,
+    LK.TrangThai
+FROM LichKham LK
+JOIN BenhNhan BN ON LK.MaBN = BN.MaBN
+JOIN BacSi BS ON LK.MaBS = BS.MaBS
+JOIN Khoa K ON BS.MaKhoa = K.MaKhoa;
+GO
+
+SELECT *
+FROM vw_DanhSachLichKham;
+
+SELECT *
+FROM vw_DanhSachLichKham
+WHERE TrangThai = N'Chờ khám';
+
+//view2 thong ke hoa don theo benh nhan
+CREATE VIEW vw_ThongKeHoaDonBenhNhan
+AS
+SELECT 
+    BN.MaBN,
+    BN.HoTen AS TenBenhNhan,
+    BA.MaBA,
+    HD.MaHD,
+    HD.NgayLap,
+    HD.TongTien,
+    HD.TrangThai
+FROM BenhNhan BN
+LEFT JOIN LichKham LK ON BN.MaBN = LK.MaBN
+LEFT JOIN HoSoBenhAn BA ON LK.MaLK = BA.MaLK
+LEFT JOIN HoaDon HD ON BA.MaBA = HD.MaBA;
+GO
+
+SELECT *
+FROM vw_ThongKeHoaDonBenhNhan;
+
+SELECT *
+FROM vw_ThongKeHoaDonBenhNhan
+WHERE TrangThai = N'Chưa thanh toán';
+
+
+//du lieu mau
+```sql
+USE QuanLyBenhVien;
+GO
+
+-- 1. Khoa
+INSERT INTO Khoa (MaKhoa, TenKhoa, DienThoai, Email)
+VALUES
+('K01', N'Khoa Nội', '0241111111', 'no i@benhvien.vn'),
+('K02', N'Khoa Ngoại', '0242222222', 'ngoai@benhvien.vn'),
+('K03', N'Khoa Nhi', '0243333333', 'nhi@benhvien.vn');
+GO
+
+-- 2. BacSi
+INSERT INTO BacSi
+    (MaBS, HoTen, NgaySinh, GioiTinh, SDT, Email, MaKhoa)
+VALUES
+('BS01', N'Nguyễn Văn An', '1980-05-12', N'Nam', '0911111111', 'an@benhvien.vn', 'K01'),
+('BS02', N'Trần Thị Hoa', '1985-08-20', N'Nữ', '0911111112', 'hoa@benhvien.vn', 'K02'),
+('BS03', N'Lê Văn Bình', '1978-03-15', N'Nam', '0911111113', 'binh@benhvien.vn', 'K03');
+GO
+
+-- 3. BenhNhan
+INSERT INTO BenhNhan
+    (MaBN, HoTen, NgaySinh, GioiTinh, SDT, DiaChi)
+VALUES
+('BN01', N'Phạm Minh Đức', '2003-02-10', N'Nam', '0981111111', N'Hà Nội'),
+('BN02', N'Nguyễn Thu Trang', '2001-07-25', N'Nữ', '0981111112', N'Ninh Bình'),
+('BN03', N'Trần Quốc Huy', '2015-11-03', N'Nam', '0981111113', N'Hà Nội');
+GO
+
+-- 4. LichKham
+INSERT INTO LichKham
+    (MaLK, MaBN, MaBS, ThoiGianKham, LyDo, TrangThai)
+VALUES
+('LK01', 'BN01', 'BS01', '2026-10-16 08:00', N'Đau bụng', N'Đã khám'),
+('LK02', 'BN02', 'BS02', '2026-10-17 09:00', N'Đau tay', N'Chờ khám'),
+('LK03', 'BN03', 'BS03', '2026-10-18 10:00', N'Ho và sốt', N'Đã khám');
+GO
+
+-- 5. HoSoBenhAn
+INSERT INTO HoSoBenhAn
+    (MaBA, MaLK, TrieuChung, ChanDoan, KetLuan)
+VALUES
+('BA01', 'LK01', N'Đau bụng', N'Rối loạn tiêu hóa', N'Theo dõi và tái khám nếu cần'),
+('BA02', 'LK03', N'Ho, sốt nhẹ', N'Viêm đường hô hấp trên', N'Điều trị theo chỉ định bác sĩ');
+GO
+
+-- 6. DonThuoc
+INSERT INTO DonThuoc (MaDT, MaBA, GhiChu)
+VALUES
+('DT01', 'BA01', N'Uống thuốc sau bữa ăn'),
+('DT02', 'BA02', N'Sử dụng theo hướng dẫn bác sĩ');
+GO
+
+-- 7. Thuoc
+INSERT INTO Thuoc
+    (MaThuoc, TenThuoc, DonVi, DonGia, SoLuongTon)
+VALUES
+('T01', N'Paracetamol', N'Viên', 2000, 100),
+('T02', N'Oresol', N'Gói', 5000, 80),
+('T03', N'Vitamin C', N'Viên', 1500, 150);
+GO
+
+-- 8. ChiTietDonThuoc
+INSERT INTO ChiTietDonThuoc
+    (MaDT, MaThuoc, LieuDung, SoLuong, DonGiaKe)
+VALUES
+('DT01', 'T01', N'Theo chỉ định', 6, 2000),
+('DT01', 'T03', N'Theo chỉ định', 10, 1500),
+('DT02', 'T02', N'Pha theo hướng dẫn', 4, 5000);
+GO
+
+-- 9. DichVu
+INSERT INTO DichVu (MaDV, TenDV, DonGia, MoTa)
+VALUES
+('DV01', N'Khám tổng quát', 150000, N'Khám sức khỏe tổng quát'),
+('DV02', N'Xét nghiệm máu', 100000, N'Xét nghiệm mẫu máu'),
+('DV03', N'Chụp X-quang', 200000, N'Chẩn đoán hình ảnh');
+GO
+
+-- 10. ChiTietDichVu
+INSERT INTO ChiTietDichVu
+    (MaBA, MaDV, LanThucHien, SoLuong, DonGiaApDung, NgayThucHien)
+VALUES
+('BA01', 'DV01', 1, 1, 150000, '2026-10-16 08:15'),
+('BA01', 'DV02', 1, 1, 100000, '2026-10-16 08:30'),
+('BA02', 'DV03', 1, 1, 200000, '2026-10-18 10:15');
+GO
+
+-- 11. HoaDon
+INSERT INTO HoaDon
+    (MaHD, MaBA, NgayLap, TongTien, TrangThai)
+VALUES
+('HD01', 'BA01', '2026-10-16 09:00', 265000, N'Đã thanh toán'),
+('HD02', 'BA02', '2026-10-18 11:00', 220000, N'Chưa thanh toán');
+GO
+```
