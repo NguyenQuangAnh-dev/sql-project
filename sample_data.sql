@@ -1,13 +1,3 @@
-/* =====================================================================
-   DU LIEU MAU DAY DU - QuanLyBenhVien  (= sample_data.sql + sample_data_more.sql)
-   Chay MOT LAN tren database con RONG, theo thu tu:
-     1) quanlybenhvien.sql (tao bang)  2) triggers.sql  3) file nay
-   - Trigger phai co truoc: chung tu dong tru ton kho va tinh TongTien.
-   - Neu database da co du lieu (Khoa K01 ton tai), file tu dung, khong chen trung.
-   - Phan 'BO SUNG' co y bo trong ma LK06, BA04, DT04, HD04 vi test T7
-     trong test_triggers.sql dung cac ma nay.
-   - Luu file UTF-8 co BOM de tieng Viet khong bi loi.
-   ===================================================================== */
 USE QuanLyBenhVien;
 GO
 

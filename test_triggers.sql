@@ -1,11 +1,3 @@
-/* =====================================================================
-   TEST TRIGGER - QuanLyBenhVien
-   Yeu cau: da chay sample_data.sql (ton kho T01=84, T02=36, T03=180,
-            T04=5, T05=30; TongTien HD01=385000, HD02=442000, HD03=159000).
-   Moi test chay trong BEGIN TRAN ... ROLLBACK nen CHAY LAI DUOC nhieu lan,
-   du lieu khong bi thay doi. Chay TUNG TEST (boi den tung khoi) va chup
-   anh phan Results/Messages cho bao cao.
-   ===================================================================== */
 USE QuanLyBenhVien;
 GO
 

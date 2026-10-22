@@ -1,24 +1,3 @@
-/*
-    backup_restore.sql
-    Du an: QuanLyBenhVien
-    Moi truong: SQL Server 2022 Express - (local)\SQLEXPRESS
-
-    Muc dich:
-      1. Sao luu full database QuanLyBenhVien.
-      2. Xem lich su backup va kiem tra file backup.
-      3. Xem logical file trong ban backup.
-      4. Phuc hoi vao QuanLyBenhVien_Test (khong ghi de database goc).
-      5. Kiem tra bang, trigger va so sanh so dong.
-
-    LUU Y:
-      - Chay bang tai khoan co quyen backup/restore database.
-      - SQL Server service account can quyen ghi vao thu muc Backup.
-      - Duong dan va logical file duoi day theo cau hinh hien tai cua nhom.
-      - Script se xoa database QuanLyBenhVien_Test neu database nay da ton tai,
-        de co the restore lai. KHONG doi ten database thu nghiem thanh database goc.
-      - Khong dua file .bak len GitHub.
-*/
-
 USE master;
 GO
 
@@ -94,3 +73,70 @@ FROM DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\Bac
 WITH
     MOVE N'QuanLyBenhVien'
         TO N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\QuanLyBenhVien_Test.mdf',
+    MOVE N'QuanLyBenhVien_log'
+        TO N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\QuanLyBenhVien_Test_log.ldf',
+    RECOVERY,
+    STATS = 10;
+GO
+
+/* ================================================================
+   BUOC 7. KIEM TRA DATABASE SAU KHI RESTORE
+   Mong doi: 11 bang va 4 trigger.
+   ================================================================ */
+USE QuanLyBenhVien_Test;
+GO
+
+SELECT COUNT(*) AS SoBang
+FROM sys.tables;
+GO
+
+SELECT name AS TenTrigger,
+       OBJECT_NAME(parent_id) AS BangTacDong,
+       is_disabled AS BiVoHieuHoa
+FROM sys.triggers
+ORDER BY name;
+GO
+
+/* ================================================================
+   BUOC 8. DOI CHIEU SO DONG GIUA DATABASE GOC VA DATABASE RESTORE
+   Hai cot SoDongGoc va SoDongTest cua moi bang phai bang nhau.
+   Luu y: neu nap du lieu mau SAU khi backup thi so dong se khac nhau;
+   khi do hay backup lai roi restore lai truoc khi doi chieu.
+   ================================================================ */
+SELECT N'Khoa' AS Bang,
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.Khoa) AS SoDongGoc,
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.Khoa) AS SoDongTest
+UNION ALL SELECT N'BacSi',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.BacSi),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.BacSi)
+UNION ALL SELECT N'BenhNhan',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.BenhNhan),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.BenhNhan)
+UNION ALL SELECT N'LichKham',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.LichKham),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.LichKham)
+UNION ALL SELECT N'HoSoBenhAn',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.HoSoBenhAn),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.HoSoBenhAn)
+UNION ALL SELECT N'DonThuoc',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.DonThuoc),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.DonThuoc)
+UNION ALL SELECT N'Thuoc',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.Thuoc),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.Thuoc)
+UNION ALL SELECT N'ChiTietDonThuoc',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.ChiTietDonThuoc),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.ChiTietDonThuoc)
+UNION ALL SELECT N'DichVu',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.DichVu),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.DichVu)
+UNION ALL SELECT N'ChiTietDichVu',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.ChiTietDichVu),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.ChiTietDichVu)
+UNION ALL SELECT N'HoaDon',
+       (SELECT COUNT(*) FROM QuanLyBenhVien.dbo.HoaDon),
+       (SELECT COUNT(*) FROM QuanLyBenhVien_Test.dbo.HoaDon);
+GO
+
+USE master;
+GO

@@ -46,7 +46,7 @@ BEGIN
        AND @DenNgay IS NOT NULL
        AND @TuNgay > @DenNgay
     BEGIN
-        THROW 50001, N'Tu ngay khong duoc lon hon den ngay.', 1;
+        ;THROW 50001, N'Tu ngay khong duoc lon hon den ngay.', 1;
     END;
 
     SELECT
@@ -87,12 +87,12 @@ BEGIN
 
     IF @TuNgay IS NULL OR @DenNgay IS NULL
     BEGIN
-        THROW 50002, N'Vui long nhap ngay bat dau va ngay ket thuc.', 1;
+        ;THROW 50002, N'Vui long nhap ngay bat dau va ngay ket thuc.', 1;
     END;
 
     IF @TuNgay > @DenNgay
     BEGIN
-        THROW 50003, N'Tu ngay khong duoc lon hon den ngay.', 1;
+        ;THROW 50003, N'Tu ngay khong duoc lon hon den ngay.', 1;
     END;
 
     SELECT
@@ -101,7 +101,7 @@ BEGIN
         COUNT(lk.MaLK) AS TongLuotKham,
         SUM(
             CASE
-                WHEN lk.TrangThai = N'Dã khám' THEN 1
+                WHEN lk.TrangThai = N'Đã khám' THEN 1
                 ELSE 0
             END
         ) AS SoLuotDaKham
