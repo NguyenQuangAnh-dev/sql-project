@@ -1,4 +1,11 @@
--- Tạo cơ sở dữ liệu
+USE master;
+GO
+IF DB_ID('QuanLyBenhVien') IS NOT NULL
+BEGIN
+    ALTER DATABASE QuanLyBenhVien SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE QuanLyBenhVien;
+END
+GO
 CREATE DATABASE QuanLyBenhVien;
 GO
 USE QuanLyBenhVien;
